@@ -1,0 +1,130 @@
+name: Deploy
+
+# TODO: when Scaleway Edge Services is wired up in front of docs.bindist.eu
+# (mirroring whatever pattern the main bindist.eu site ends up using):
+#   1. drop `--acl public-read` from every aws s3 sync step below — the bucket
+#      can be private once the edge is the only public access path
+#   2. add a final cache-purge step that calls the edge pipeline's purge API,
+#      gated on a `SCW_DOCS_EDGE_PIPELINE_ID` secret so it stays a no-op until
+#      the edge actually exists
+# Match the implementation to whatever ships for the main site rather than
+# guessing the API shape here.
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.SCW_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.SCW_SECRET_KEY }}
+      AWS_DEFAULT_REGION: ${{ secrets.SCW_REGION }}
+      SCW_S3_ENDPOINT: ${{ secrets.SCW_S3_ENDPOINT }}
+      SCW_DOCS_BUCKET: ${{ secrets.SCW_DOCS_BUCKET }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build site (strict)
+        run: mkdocs build --strict
+
+      - name: Validate Scaleway configuration
+        run: |
+          : "${AWS_ACCESS_KEY_ID:?SCW_ACCESS_KEY secret is not set}"
+          : "${AWS_SECRET_ACCESS_KEY:?SCW_SECRET_KEY secret is not set}"
+          : "${SCW_S3_ENDPOINT:?SCW_S3_ENDPOINT secret is not set (e.g. https://s3.fr-par.scw.cloud)}"
+          : "${SCW_DOCS_BUCKET:?SCW_DOCS_BUCKET secret is not set}"
+
+      - name: Sync HTML (short cache, public-read)
+        working-directory: site
+        run: |
+          aws s3 sync . "s3://${SCW_DOCS_BUCKET}/" \
+            --endpoint-url "${SCW_S3_ENDPOINT}" \
+            --acl public-read \
+            --delete \
+            --exclude "*" \
+            --include "*.html" \
+            --include "sitemap.xml" \
+            --cache-control "max-age=300" \
+            --content-type "text/html"
+
+      - name: Sync CSS (long cache, public-read)
+        working-directory: site
+        run: |
+          aws s3 sync . "s3://${SCW_DOCS_BUCKET}/" \
+            --endpoint-url "${SCW_S3_ENDPOINT}" \
+            --acl public-read \
+            --exclude "*" \
+            --include "*.css" \
+            --cache-control "max-age=31536000" \
+            --content-type "text/css"
+
+      - name: Sync JavaScript (long cache, public-read)
+        working-directory: site
+        run: |
+          aws s3 sync . "s3://${SCW_DOCS_BUCKET}/" \
+            --endpoint-url "${SCW_S3_ENDPOINT}" \
+            --acl public-read \
+            --exclude "*" \
+            --include "*.js" \
+            --cache-control "max-age=31536000" \
+            --content-type "application/javascript"
+
+      - name: Sync fonts and images (long cache, public-read)
+        working-directory: site
+        run: |
+          aws s3 sync . "s3://${SCW_DOCS_BUCKET}/" \
+            --endpoint-url "${SCW_S3_ENDPOINT}" \
+            --acl public-read \
+            --exclude "*" \
+            --include "*.woff" \
+            --include "*.woff2" \
+            --include "*.ttf" \
+            --include "*.eot" \
+            --include "*.svg" \
+            --include "*.png" \
+            --include "*.jpg" \
+            --include "*.jpeg" \
+            --include "*.gif" \
+            --include "*.ico" \
+            --include "*.webp" \
+            --cache-control "max-age=31536000"
+
+      - name: Sync remaining assets and prune deleted files
+        working-directory: site
+        run: |
+          aws s3 sync . "s3://${SCW_DOCS_BUCKET}/" \
+            --endpoint-url "${SCW_S3_ENDPOINT}" \
+            --acl public-read \
+            --delete \
+            --cache-control "max-age=3600"
+
+      - name: Summary
+        run: |
+          {
+            echo "### Deployment complete"
+            echo ""
+            echo "- Bucket: \`$SCW_DOCS_BUCKET\`"
+            echo "- Endpoint: \`$SCW_S3_ENDPOINT\`"
+          } >> "$GITHUB_STEP_SUMMARY"
