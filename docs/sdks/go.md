@@ -14,6 +14,15 @@ Source: [github.com/BinDist/bindist-api-go](https://github.com/BinDist/bindist-a
 go get github.com/BinDist/bindist-api-go
 ```
 
+## API key format
+
+API keys are passed to `NewClient` as a single string in the form `{tenant_id}.{secret}` — the tenant ID and the secret joined by a literal dot. The tenant ID is a UUID issued when your customer account is created; the secret is the value returned (once) when an API key is provisioned. A bare secret without the tenant prefix will be rejected by the API.
+
+```go
+apiKey := tenantID + "." + secret  // e.g. "14632221-b1b6-4eec-844a-39f60c7f1523.<secret>"
+client := bindist.NewClient("https://api.bindist.eu", apiKey)
+```
+
 ## Quick Start
 
 ```go

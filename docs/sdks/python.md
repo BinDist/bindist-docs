@@ -21,6 +21,15 @@ cd bindist-api-python
 pip install -e .
 ```
 
+## API key format
+
+API keys are passed as a single string in the form `{tenant_id}.{secret}` — the tenant ID (a UUID issued when your customer account is created) and the secret (returned once when an API key is provisioned), joined by a literal dot. A bare secret without the tenant prefix will be rejected by the API.
+
+```python
+api_key = f"{tenant_id}.{secret}"
+client = CustomerClient("https://api.bindist.eu", api_key)
+```
+
 ## Quick Start
 
 ```python
