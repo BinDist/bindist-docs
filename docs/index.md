@@ -15,37 +15,37 @@ BinDist is a secure, multi-tenant application distribution system built on AWS s
 
 <div class="grid cards" markdown>
 
--   :material-rocket-launch:{ .lg .middle } **Getting Started**
+-   **Getting Started**
 
     ---
 
     Get up and running with BinDist in minutes
 
-    [:octicons-arrow-right-24: Quick Start](getting-started/quick-start.md)
+    [Quick Start](getting-started/quick-start.md)
 
--   :material-api:{ .lg .middle } **API Reference**
+-   **API Reference**
 
     ---
 
     Complete API documentation with examples
 
-    [:octicons-arrow-right-24: API Overview](api/overview.md)
+    [API Overview](api/overview.md)
 
--   :material-language-javascript:{ .lg .middle } **JavaScript SDK**
+-   **JavaScript SDK**
 
     ---
 
     Use our official JavaScript/TypeScript client
 
-    [:octicons-arrow-right-24: SDK Documentation](sdks/javascript.md)
+    [SDK Documentation](sdks/javascript.md)
 
--   :material-upload:{ .lg .middle } **Upload Guide**
+-   **Upload Guide**
 
     ---
 
     Learn how to upload and manage applications
 
-    [:octicons-arrow-right-24: Uploading Applications](guides/uploading.md)
+    [Uploading Applications](guides/uploading.md)
 
 </div>
 
