@@ -1,14 +1,9 @@
 name: Deploy
 
-# TODO: when Scaleway Edge Services is wired up in front of docs.bindist.eu
-# (mirroring whatever pattern the main bindist.eu site ends up using):
-#   1. drop `--acl public-read` from every aws s3 sync step below — the bucket
-#      can be private once the edge is the only public access path
-#   2. add a final cache-purge step that calls the edge pipeline's purge API,
-#      gated on a `SCW_DOCS_EDGE_PIPELINE_ID` secret so it stays a no-op until
-#      the edge actually exists
-# Match the implementation to whatever ships for the main site rather than
-# guessing the API shape here.
+# TODO: add a final cache-purge step that calls the Scaleway Edge Services
+# purge API for the docs.bindist.eu pipeline, gated on a SCW_DOCS_EDGE_PIPELINE_ID
+# secret. Match the implementation to whatever the main bindist.eu site uses
+# rather than guessing the API shape here.
 
 on:
   push:
@@ -56,12 +51,11 @@ jobs:
           : "${SCW_S3_ENDPOINT:?SCW_S3_ENDPOINT secret is not set (e.g. https://s3.fr-par.scw.cloud)}"
           : "${SCW_DOCS_BUCKET:?SCW_DOCS_BUCKET secret is not set}"
 
-      - name: Sync HTML (short cache, public-read)
+      - name: Sync HTML (short cache)
         working-directory: site
         run: |
           aws s3 sync . "s3://${SCW_DOCS_BUCKET}/" \
             --endpoint-url "${SCW_S3_ENDPOINT}" \
-            --acl public-read \
             --delete \
             --exclude "*" \
             --include "*.html" \
@@ -69,34 +63,31 @@ jobs:
             --cache-control "max-age=300" \
             --content-type "text/html"
 
-      - name: Sync CSS (long cache, public-read)
+      - name: Sync CSS (long cache)
         working-directory: site
         run: |
           aws s3 sync . "s3://${SCW_DOCS_BUCKET}/" \
             --endpoint-url "${SCW_S3_ENDPOINT}" \
-            --acl public-read \
             --exclude "*" \
             --include "*.css" \
             --cache-control "max-age=31536000" \
             --content-type "text/css"
 
-      - name: Sync JavaScript (long cache, public-read)
+      - name: Sync JavaScript (long cache)
         working-directory: site
         run: |
           aws s3 sync . "s3://${SCW_DOCS_BUCKET}/" \
             --endpoint-url "${SCW_S3_ENDPOINT}" \
-            --acl public-read \
             --exclude "*" \
             --include "*.js" \
             --cache-control "max-age=31536000" \
             --content-type "application/javascript"
 
-      - name: Sync fonts and images (long cache, public-read)
+      - name: Sync fonts and images (long cache)
         working-directory: site
         run: |
           aws s3 sync . "s3://${SCW_DOCS_BUCKET}/" \
             --endpoint-url "${SCW_S3_ENDPOINT}" \
-            --acl public-read \
             --exclude "*" \
             --include "*.woff" \
             --include "*.woff2" \
@@ -116,7 +107,6 @@ jobs:
         run: |
           aws s3 sync . "s3://${SCW_DOCS_BUCKET}/" \
             --endpoint-url "${SCW_S3_ENDPOINT}" \
-            --acl public-read \
             --delete \
             --cache-control "max-age=3600"
 
