@@ -61,8 +61,10 @@ nav:
       - Downloads: api/downloads.md
       - Management: api/management.md
   - SDKs:
-      - JavaScript SDK: sdks/javascript.md
+      - Go SDK: sdks/go.md
       - Delphi SDK: sdks/delphi.md
+      - JavaScript SDK: sdks/javascript.md
+      - Python SDK: sdks/python.md
       - PowerShell: sdks/powershell.md
   - Guides:
       - Uploading Applications: guides/uploading.md
