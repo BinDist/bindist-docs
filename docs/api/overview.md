@@ -125,7 +125,7 @@ These endpoints require an admin API key:
 | DELETE | `/v1/management/applications/{id}` | [Delete application](management.md#delete-application) |
 | POST | `/v1/management/upload` | [Upload binary](management.md#upload-binary) |
 | POST | `/v1/management/upload/large-url` | [Get upload URL](management.md#large-file-upload) |
-| POST | `/v1/management/upload/large-complete` | [Complete upload](management.md#complete-large-upload) |
+| POST | `/v1/management/upload/large-complete` | [Complete upload](management.md#step-3-complete-upload) |
 | GET | `/v1/management/customers` | [List customers](management.md#list-customers) |
 | PATCH | `/v1/management/customers/{id}` | [Update customer](management.md#update-customer) |
 | POST | `/v1/management/customers/{id}/apikeys` | [Create API key](management.md#create-api-key) |
