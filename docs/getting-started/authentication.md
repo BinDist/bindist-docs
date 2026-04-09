@@ -4,12 +4,26 @@ BinDist uses API key authentication to secure all API endpoints.
 
 ## API Key Format
 
-API keys follow the format `{tenantId}.{secret}`:
+The shape of the API key depends on which deployment you're talking to.
 
-- **Tenant ID**: Your unique account identifier
-- **Secret**: A randomly generated secret key
+### Hosted (api.bindist.eu)
 
-Example: `abc123.xYz789SecretKeyHere`
+On the hosted, multi-tenant deployment, API keys follow the format `{tenantId}.{secret}`:
+
+- **Tenant ID**: A UUID issued when your customer account is created.
+- **Secret**: A randomly generated secret, returned once when the key is provisioned.
+
+The two are joined by a literal dot. Example:
+
+```
+14632221-b1b6-4eec-844a-39f60c7f1523.xYz789SecretKeyHere
+```
+
+A bare secret without the tenant prefix will be rejected.
+
+### Self-hosted (single-tenant)
+
+On a self-hosted, single-tenant deployment there is only one possible tenant, so the tenant prefix is unnecessary. You can pass just the secret as your API key.
 
 ## Sending Your API Key
 
@@ -30,7 +44,7 @@ X-API-Key: YOUR_API_KEY
 === "curl"
 
     ```bash
-    curl -H "Authorization: Bearer abc123.xYz789SecretKeyHere" \
+    curl -H "Authorization: Bearer 14632221-b1b6-4eec-844a-39f60c7f1523.xYz789SecretKeyHere" \
       https://api.bindist.eu/v1/applications
     ```
 
@@ -39,7 +53,7 @@ X-API-Key: YOUR_API_KEY
     ```javascript
     const response = await fetch('https://api.bindist.eu/v1/applications', {
       headers: {
-        'Authorization': 'Bearer abc123.xYz789SecretKeyHere'
+        'Authorization': 'Bearer 14632221-b1b6-4eec-844a-39f60c7f1523.xYz789SecretKeyHere'
       }
     });
     ```
@@ -48,7 +62,7 @@ X-API-Key: YOUR_API_KEY
 
     ```powershell
     $headers = @{
-      "Authorization" = "Bearer abc123.xYz789SecretKeyHere"
+      "Authorization" = "Bearer 14632221-b1b6-4eec-844a-39f60c7f1523.xYz789SecretKeyHere"
     }
     Invoke-RestMethod -Uri "https://api.bindist.eu/v1/applications" -Headers $headers
     ```
@@ -90,7 +104,7 @@ Customer keys provide read-only access:
 === "Environment Variables"
 
     ```bash
-    export BINDIST_API_KEY="abc123.xYz789SecretKeyHere"
+    export BINDIST_API_KEY="14632221-b1b6-4eec-844a-39f60c7f1523.xYz789SecretKeyHere"
     ```
 
     ```javascript
@@ -100,7 +114,7 @@ Customer keys provide read-only access:
 === ".env File"
 
     ```
-    BINDIST_API_KEY=abc123.xYz789SecretKeyHere
+    BINDIST_API_KEY=14632221-b1b6-4eec-844a-39f60c7f1523.xYz789SecretKeyHere
     ```
 
     !!! warning

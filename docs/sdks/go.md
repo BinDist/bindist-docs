@@ -16,11 +16,18 @@ go get github.com/BinDist/bindist-api-go
 
 ## API key format
 
-API keys are passed to `NewClient` as a single string in the form `{tenant_id}.{secret}` — the tenant ID and the secret joined by a literal dot. The tenant ID is a UUID issued when your customer account is created; the secret is the value returned (once) when an API key is provisioned. A bare secret without the tenant prefix will be rejected by the API.
+The shape of the API key depends on which deployment you're talking to:
+
+- **Hosted (`api.bindist.eu`, multi-tenant):** `{tenant_id}.{secret}` — the tenant ID (a UUID issued when your customer account is created) and the secret (returned once when the key is provisioned), joined by a literal dot. A bare secret will be rejected.
+- **Self-hosted (single-tenant):** just the secret. There's only one possible tenant, so the prefix is unnecessary.
 
 ```go
+// Hosted
 apiKey := tenantID + "." + secret  // e.g. "14632221-b1b6-4eec-844a-39f60c7f1523.<secret>"
 client := bindist.NewClient("https://api.bindist.eu", apiKey)
+
+// Self-hosted
+client := bindist.NewClient("https://bindist.internal.example.com", secret)
 ```
 
 ## Quick Start

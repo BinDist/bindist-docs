@@ -23,11 +23,18 @@ pip install -e .
 
 ## API key format
 
-API keys are passed as a single string in the form `{tenant_id}.{secret}` — the tenant ID (a UUID issued when your customer account is created) and the secret (returned once when an API key is provisioned), joined by a literal dot. A bare secret without the tenant prefix will be rejected by the API.
+The shape of the API key depends on which deployment you're talking to:
+
+- **Hosted (`api.bindist.eu`, multi-tenant):** `{tenant_id}.{secret}` — the tenant ID (a UUID issued when your customer account is created) and the secret (returned once when the key is provisioned), joined by a literal dot. A bare secret will be rejected.
+- **Self-hosted (single-tenant):** just the secret. There's only one possible tenant, so the prefix is unnecessary.
 
 ```python
+# Hosted
 api_key = f"{tenant_id}.{secret}"
 client = CustomerClient("https://api.bindist.eu", api_key)
+
+# Self-hosted
+client = CustomerClient("https://bindist.internal.example.com", secret)
 ```
 
 ## Quick Start
