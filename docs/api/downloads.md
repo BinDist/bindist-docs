@@ -30,9 +30,35 @@ GET /v1/downloads/url
       "https://api.bindist.eu/v1/downloads/url?applicationId=my-app&version=2.1.0"
     ```
 
+=== "Go"
+
+    ```go
+    download, err := client.GetDownloadInfo(ctx, "my-app", "2.1.0", "")
+    if download.Success {
+        fmt.Println(download.Data.URL)
+    }
+    ```
+
+    The fourth argument is an optional `fileID` for multi-file versions; pass `""` for the default `MAIN` file.
+
+=== "Rust"
+
+    ```rust
+    use bindist::GetDownloadInfoOptions;
+
+    let info = client
+        .get_download_info(
+            "my-app",
+            "2.1.0",
+            &GetDownloadInfoOptions::default(),
+        )
+        .await?;
+    println!("{}", info.url);
+    ```
+
 === "JavaScript"
 
-    ```javascript
+    ```typescript
     const result = await client.getDownloadInfo('my-app', '2.1.0');
     if (result.success) {
       console.log(result.data.downloadUrl);
@@ -56,7 +82,7 @@ GET /v1/downloads/url
 
 ### Downloading the File
 
-Use the pre-signed URL to download directly:
+The SDKs wrap "get URL → GET pre-signed URL → write bytes" into a single call. With curl, do it in two steps:
 
 === "curl"
 
@@ -64,19 +90,41 @@ Use the pre-signed URL to download directly:
     curl -L -o my-app-2.1.0.exe "DOWNLOAD_URL"
     ```
 
-=== "JavaScript (Node.js)"
+=== "Go"
 
-    ```javascript
-    import { writeFileSync } from 'fs';
+    ```go
+    // Into memory, with optional SHA256 checksum verification
+    content, metadata, err := client.DownloadFile(ctx, "my-app", "2.1.0", "", true)
+    os.WriteFile(metadata.FileName, content, 0644)
 
-    const buffer = await client.downloadFile(downloadUrl);
-    writeFileSync('my-app-2.1.0.exe', Buffer.from(buffer));
+    // Stream straight to disk (good for large files)
+    f, _ := os.Create("my-app-2.1.0.exe")
+    defer f.Close()
+    metadata, err = client.DownloadFileToWriter(ctx, "my-app", "2.1.0", "", f)
     ```
 
-=== "PowerShell"
+=== "Rust"
 
-    ```powershell
-    Invoke-WebRequest -Uri $downloadUrl -OutFile "my-app-2.1.0.exe"
+    ```rust
+    use bindist::GetDownloadInfoOptions;
+
+    let (info, bytes) = client
+        .download("my-app", "2.1.0", &GetDownloadInfoOptions::default())
+        .await?;
+    std::fs::write(&info.file_name, &bytes)?;
+    ```
+
+=== "JavaScript"
+
+    ```typescript
+    import { writeFileSync } from 'fs';
+
+    const info = await client.getDownloadInfo('my-app', '2.1.0');
+    const buffer = await client.downloadFile(info.data.downloadUrl);
+    writeFileSync('my-app-2.1.0.exe', Buffer.from(buffer));
+
+    // For large files, prefer the streaming variant:
+    const stream = await client.downloadFileStream(info.data.downloadUrl);
     ```
 
 ### Error Responses
@@ -140,9 +188,34 @@ POST /v1/downloads/share
       https://api.bindist.eu/v1/downloads/share
     ```
 
+=== "Go"
+
+    ```go
+    share, err := client.CreateShareLink(ctx, "my-app", "2.1.0", "", 60)
+    if share.Success {
+        fmt.Println(share.Data.ShareURL)
+    }
+    ```
+
+=== "Rust"
+
+    ```rust
+    use bindist::CreateShareLinkRequest;
+
+    let share = client
+        .create_share_link(&CreateShareLinkRequest {
+            application_id: "my-app".into(),
+            version: "2.1.0".into(),
+            file_id: None,
+            expires_in_minutes: Some(60),
+        })
+        .await?;
+    println!("{}", share.share_url);
+    ```
+
 === "JavaScript"
 
-    ```javascript
+    ```typescript
     const result = await client.createShareLink({
       applicationId: 'my-app',
       version: '2.1.0',

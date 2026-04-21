@@ -31,9 +31,40 @@ GET /v1/applications/{applicationId}/versions
       https://api.bindist.eu/v1/applications/my-app/versions
     ```
 
+=== "Go"
+
+    ```go
+    versions, err := client.ListVersions(ctx, "my-app")
+
+    // Include disabled / pre-release versions:
+    versions, err = client.ListVersions(ctx, "my-app",
+        bindist.WithChannel(bindist.ChannelTest))
+    ```
+
+=== "Rust"
+
+    ```rust
+    use bindist::{Channel, ListVersionsOptions};
+
+    let versions = client
+        .list_versions("my-app", &ListVersionsOptions::default())
+        .await?;
+
+    // Include disabled / pre-release versions:
+    let versions = client
+        .list_versions(
+            "my-app",
+            &ListVersionsOptions {
+                channel: Some(Channel::Test),
+                ..Default::default()
+            },
+        )
+        .await?;
+    ```
+
 === "JavaScript"
 
-    ```javascript
+    ```typescript
     const result = await client.listVersions('my-app');
     console.log(result.data.versions);
     ```
@@ -91,10 +122,31 @@ GET /v1/applications/{applicationId}/versions/{version}/files
 
 ### Example Request
 
-```bash
-curl -H "Authorization: Bearer YOUR_API_KEY" \
-  https://api.bindist.eu/v1/applications/my-app/versions/2.1.0/files
-```
+=== "curl"
+
+    ```bash
+    curl -H "Authorization: Bearer YOUR_API_KEY" \
+      https://api.bindist.eu/v1/applications/my-app/versions/2.1.0/files
+    ```
+
+=== "Go"
+
+    ```go
+    files, err := client.ListVersionFiles(ctx, "my-app", "2.1.0")
+    ```
+
+=== "Rust"
+
+    ```rust
+    let files = client.list_version_files("my-app", "2.1.0").await?;
+    ```
+
+=== "JavaScript"
+
+    ```typescript
+    const result = await client.listVersionFiles('my-app', '2.1.0');
+    console.log(result.data.files);
+    ```
 
 ### Example Response
 

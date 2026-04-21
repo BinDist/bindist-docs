@@ -5,6 +5,9 @@ Admin endpoints for managing applications, customers, and uploads.
 !!! warning "Admin Access Required"
     All endpoints on this page require an **admin API key**.
 
+!!! info "SDK coverage"
+    Go examples use the [`AdminClient`](../sdks/go.md#admin-client) (`bindist.NewAdminClient`). The Rust SDK is customer-only and does not expose admin endpoints — call them over HTTP directly, or use the Go SDK.
+
 ---
 
 ## Create Application
@@ -27,18 +30,33 @@ POST /v1/management/applications
 
 ### Example Request
 
-```bash
-curl -X POST \
-  -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "applicationId": "my-new-app",
-    "name": "My New Application",
-    "description": "A brand new application",
-    "tags": ["windows", "utility"]
-  }' \
-  https://api.bindist.eu/v1/management/applications
-```
+=== "curl"
+
+    ```bash
+    curl -X POST \
+      -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "applicationId": "my-new-app",
+        "name": "My New Application",
+        "description": "A brand new application",
+        "tags": ["windows", "utility"]
+      }' \
+      https://api.bindist.eu/v1/management/applications
+    ```
+
+=== "Go"
+
+    ```go
+    admin := bindist.NewAdminClient("https://api.bindist.eu", "YOUR_ADMIN_API_KEY")
+
+    app, err := admin.CreateApplication(ctx, bindist.CreateApplicationOptions{
+        ApplicationID: "my-new-app",
+        Name:          "My New Application",
+        Description:   "A brand new application",
+        Tags:          []string{"windows", "utility"},
+    })
+    ```
 
 ### Example Response
 
@@ -74,11 +92,25 @@ DELETE /v1/management/applications/{applicationId}
 
 ### Example Request
 
-```bash
-curl -X DELETE \
-  -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
-  https://api.bindist.eu/v1/management/applications/my-app
-```
+=== "curl"
+
+    ```bash
+    curl -X DELETE \
+      -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+      https://api.bindist.eu/v1/management/applications/my-app
+    ```
+
+=== "Go"
+
+    ```go
+    _, err := admin.DeleteApplication(ctx, "my-app")
+    ```
+
+=== "JavaScript"
+
+    ```typescript
+    const result = await client.deleteApplication('my-app');
+    ```
 
 ### Example Response
 
@@ -115,21 +147,37 @@ POST /v1/management/upload
 
 ### Example Request
 
-```bash
-curl -X POST \
-  -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
-  -F "applicationId=my-app" \
-  -F "version=2.2.0" \
-  -F "releaseNotes=New features and bug fixes" \
-  -F "file=@./my-app-2.2.0.exe" \
-  https://api.bindist.eu/v1/management/upload
-```
+=== "curl"
+
+    ```bash
+    curl -X POST \
+      -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+      -F "applicationId=my-app" \
+      -F "version=2.2.0" \
+      -F "releaseNotes=New features and bug fixes" \
+      -F "file=@./my-app-2.2.0.exe" \
+      https://api.bindist.eu/v1/management/upload
+    ```
+
+=== "Go"
+
+    ```go
+    content, _ := os.ReadFile("./my-app-2.2.0.exe")
+    result, err := admin.UploadSmallFile(ctx,
+        "my-app", "2.2.0", "my-app-2.2.0.exe", content,
+        "New features and bug fixes")
+    ```
+
+    For files ≥ 10 MB, use `admin.UploadLargeFile(...)` — it transparently runs the three-step pre-signed flow described below.
 
 ---
 
 ## Large File Upload
 
-For files larger than 10MB, use the two-step upload process.
+For files larger than 10MB, use the three-step upload process.
+
+!!! tip "Go shortcut"
+    The Go SDK's `admin.UploadLargeFile(ctx, appID, version, fileName, content, releaseNotes)` wraps all three steps below (get URL → PUT to S3 → complete). Reach for the raw steps only when you need finer control (resumable uploads, custom retry, alternative runtimes).
 
 ### Step 1: Get Upload URL
 
@@ -149,18 +197,30 @@ POST /v1/management/upload/large-url
 
 ### Example Request
 
-```bash
-curl -X POST \
-  -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "applicationId": "my-app",
-    "version": "2.2.0",
-    "fileName": "my-app-2.2.0.exe",
-    "fileSize": 52428800
-  }' \
-  https://api.bindist.eu/v1/management/upload/large-url
-```
+=== "curl"
+
+    ```bash
+    curl -X POST \
+      -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "applicationId": "my-app",
+        "version": "2.2.0",
+        "fileName": "my-app-2.2.0.exe",
+        "fileSize": 52428800
+      }' \
+      https://api.bindist.eu/v1/management/upload/large-url
+    ```
+
+=== "Go"
+
+    ```go
+    resp, err := admin.GetLargeUploadURL(ctx,
+        "my-app", "2.2.0", "my-app-2.2.0.exe",
+        52428800, "application/octet-stream")
+    uploadURL := resp.Data.UploadURL
+    uploadID  := resp.Data.UploadID
+    ```
 
 ### Example Response
 
@@ -197,7 +257,40 @@ POST /v1/management/upload/large-complete
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `uploadId` | string | Yes | Upload ID from step 1 |
+| `applicationId` | string | Yes | The application ID |
+| `version` | string | Yes | Version string |
+| `fileName` | string | Yes | Original filename |
+| `fileSize` | number | Yes | File size in bytes |
+| `checksum` | string | No | SHA256 checksum of the upload |
 | `releaseNotes` | string | No | Release notes |
+
+### Example Request
+
+=== "curl"
+
+    ```bash
+    curl -X POST \
+      -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "uploadId": "upl_abc123",
+        "applicationId": "my-app",
+        "version": "2.2.0",
+        "fileName": "my-app-2.2.0.exe",
+        "fileSize": 52428800,
+        "releaseNotes": "Major release"
+      }' \
+      https://api.bindist.eu/v1/management/upload/large-complete
+    ```
+
+=== "Go"
+
+    ```go
+    result, err := admin.CompleteLargeUpload(ctx,
+        "upl_abc123", "my-app", "2.2.0",
+        "my-app-2.2.0.exe", 52428800,
+        "", "Major release")
+    ```
 
 ---
 
@@ -208,6 +301,27 @@ List all customers in your account.
 ```
 GET /v1/management/customers
 ```
+
+### Example Request
+
+=== "curl"
+
+    ```bash
+    curl -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+      "https://api.bindist.eu/v1/management/customers?page=1&pageSize=20"
+    ```
+
+=== "Go"
+
+    ```go
+    customers, err := admin.ListCustomers(ctx, 1, 20)
+    ```
+
+=== "JavaScript"
+
+    ```typescript
+    const result = await client.listCustomers();
+    ```
 
 ### Example Response
 
@@ -246,6 +360,37 @@ PATCH /v1/management/customers/{customerId}
 | `isActive` | boolean | Active status |
 | `notes` | string | Admin notes |
 
+### Example Request
+
+=== "curl"
+
+    ```bash
+    curl -X PATCH \
+      -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{ "name": "Acme Corp (renamed)", "isActive": true }' \
+      https://api.bindist.eu/v1/management/customers/cust_abc123
+    ```
+
+=== "Go"
+
+    ```go
+    name := "Acme Corp (renamed)"
+    active := true
+    _, err := admin.UpdateCustomer(ctx, "cust_abc123", &name, &active, nil)
+    ```
+
+    Pointer fields let you distinguish "leave unchanged" (`nil`) from "set to zero value".
+
+=== "JavaScript"
+
+    ```typescript
+    const result = await client.updateCustomer('cust_abc123', {
+      name: 'Acme Corp (renamed)',
+      isActive: true,
+    });
+    ```
+
 ---
 
 ## Create API Key
@@ -255,6 +400,28 @@ Create a new API key for a customer.
 ```
 POST /v1/management/customers/{customerId}/apikeys
 ```
+
+### Example Request
+
+=== "curl"
+
+    ```bash
+    curl -X POST \
+      -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+      https://api.bindist.eu/v1/management/customers/cust_abc123/apikeys
+    ```
+
+=== "JavaScript"
+
+    ```typescript
+    const result = await client.regenerateCustomerKey('cust_abc123');
+    if (result.success) {
+      console.log('New API key:', result.data.apiKey);
+    }
+    ```
+
+!!! note "Go SDK"
+    The Go SDK doesn't ship a dedicated method for this endpoint. Use `admin.CreateCustomer(...)` if you're provisioning a brand-new customer (it returns the initial key), or call this endpoint over HTTP for additional keys on an existing customer.
 
 ### Example Response
 
@@ -290,6 +457,30 @@ GET /v1/activity
 | `applicationId` | string | Filter by application |
 | `limit` | number | Maximum items |
 | `cursor` | string | Pagination cursor |
+
+### Example Request
+
+=== "curl"
+
+    ```bash
+    curl -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+      "https://api.bindist.eu/v1/activity?type=download&limit=20"
+    ```
+
+=== "Go"
+
+    ```go
+    activity, err := admin.ListActivity(ctx, "download", "", 1, 20)
+    ```
+
+=== "JavaScript"
+
+    ```typescript
+    const result = await client.listActivity({
+      type: 'download',
+      limit: 20,
+    });
+    ```
 
 ### Example Response
 

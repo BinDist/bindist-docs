@@ -28,9 +28,34 @@ GET /v1/applications
       "https://api.bindist.eu/v1/applications?limit=10"
     ```
 
+=== "Go"
+
+    ```go
+    import bindist "github.com/BinDist/bindist-api-go"
+
+    client := bindist.NewClient("https://api.bindist.eu", "YOUR_API_KEY")
+    apps, err := client.ListApplications(ctx, &bindist.ListApplicationsOptions{
+        PageSize: 10,
+    })
+    ```
+
+=== "Rust"
+
+    ```rust
+    use bindist::{Client, ListApplicationsOptions};
+
+    let client = Client::new("https://api.bindist.eu", "YOUR_API_KEY")?;
+    let page = client
+        .list_applications(&ListApplicationsOptions {
+            limit: Some(10),
+            ..Default::default()
+        })
+        .await?;
+    ```
+
 === "JavaScript"
 
-    ```javascript
+    ```typescript
     import { createBinDistClient } from '@bindist/client';
 
     const client = createBinDistClient({
@@ -92,9 +117,21 @@ GET /v1/applications/{applicationId}
       https://api.bindist.eu/v1/applications/my-app
     ```
 
+=== "Go"
+
+    ```go
+    app, err := client.GetApplication(ctx, "my-app")
+    ```
+
+=== "Rust"
+
+    ```rust
+    let app = client.get_application("my-app").await?;
+    ```
+
 === "JavaScript"
 
-    ```javascript
+    ```typescript
     const result = await client.getApplication('my-app');
     console.log(result.data);
     ```
@@ -155,10 +192,21 @@ GET /v1/applications/{applicationId}/stats
 
 ### Example Request
 
-```bash
-curl -H "Authorization: Bearer YOUR_API_KEY" \
-  https://api.bindist.eu/v1/applications/my-app/stats
-```
+=== "curl"
+
+    ```bash
+    curl -H "Authorization: Bearer YOUR_API_KEY" \
+      https://api.bindist.eu/v1/applications/my-app/stats
+    ```
+
+=== "Go"
+
+    ```go
+    stats, err := client.GetStats(ctx, "my-app")
+    ```
+
+!!! note "Rust and JavaScript SDKs"
+    The statistics endpoint isn't covered by the Rust or JavaScript SDK clients yet. Call it directly via HTTP, or use the [Go SDK](../sdks/go.md).
 
 ### Example Response
 
