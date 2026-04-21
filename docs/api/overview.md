@@ -111,7 +111,6 @@ These endpoints are available to all authenticated users:
 | GET | `/v1/applications/{id}` | [Get application](applications.md#get-application) |
 | GET | `/v1/applications/{id}/versions` | [List versions](versions.md#list-versions) |
 | GET | `/v1/applications/{id}/versions/{v}/files` | [List version files](versions.md#list-version-files) |
-| GET | `/v1/applications/{id}/stats` | [Get statistics](applications.md#get-statistics) |
 | GET | `/v1/downloads/url` | [Get download URL](downloads.md#get-download-url) |
 | POST | `/v1/downloads/share` | [Create share link](downloads.md#create-share-link) |
 
@@ -129,4 +128,5 @@ These endpoints require an admin API key:
 | GET | `/v1/management/customers` | [List customers](management.md#list-customers) |
 | PATCH | `/v1/management/customers/{id}` | [Update customer](management.md#update-customer) |
 | POST | `/v1/management/customers/{id}/apikeys` | [Create API key](management.md#create-api-key) |
+| GET | `/v1/applications/{id}/stats` | [Get statistics](management.md#get-statistics) |
 | GET | `/v1/activity` | [List activity](management.md#list-activity) |

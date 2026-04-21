@@ -441,6 +441,70 @@ POST /v1/management/customers/{customerId}/apikeys
 
 ---
 
+## Get Statistics
+
+Get download statistics for an application.
+
+```
+GET /v1/applications/{applicationId}/stats
+```
+
+### Path Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `applicationId` | string | The application ID |
+
+### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `version` | string | Filter by specific version |
+
+### Example Request
+
+=== "curl"
+
+    ```bash
+    curl -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+      https://api.bindist.eu/v1/applications/my-app/stats
+    ```
+
+=== "Go"
+
+    ```go
+    stats, err := client.GetStats(ctx, "my-app")
+    ```
+
+    The Go SDK exposes `GetStats` on the customer `Client` type, but the endpoint requires an admin key — pass your admin key to `bindist.NewClient(...)` for this call.
+
+!!! note "Rust and JavaScript SDKs"
+    The statistics endpoint isn't covered by the Rust or JavaScript SDK clients yet. Call it directly via HTTP, or use the Go SDK.
+
+### Example Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "applicationId": "my-app",
+    "totalDownloads": 1523,
+    "downloadsByVersion": {
+      "2.1.0": 450,
+      "2.0.0": 823,
+      "1.5.0": 250
+    },
+    "downloadsByDay": [
+      { "date": "2025-01-10", "count": 45 },
+      { "date": "2025-01-09", "count": 52 },
+      { "date": "2025-01-08", "count": 38 }
+    ]
+  }
+}
+```
+
+---
+
 ## List Activity
 
 List recent upload and download activity.
