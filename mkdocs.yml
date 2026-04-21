@@ -62,6 +62,7 @@ nav:
       - Management: api/management.md
   - SDKs:
       - Go SDK: sdks/go.md
+      - Rust SDK: sdks/rust.md
       - Delphi SDK: sdks/delphi.md
       - JavaScript SDK: sdks/javascript.md
       - Python SDK: sdks/python.md

@@ -2,7 +2,7 @@
 
 The official Python client for the BinDist API. Aimed at **tooling and scripting** — release pipelines, internal CLIs, ad-hoc admin scripts — rather than embedding into a long-running application.
 
-For a richer typed integration into a runtime, prefer the [Go SDK](go.md) (executable integration) or the [JavaScript SDK](javascript.md) (web).
+For a richer typed integration into a runtime, prefer the [Go SDK](go.md) or [Rust SDK](rust.md) (executable integration) or the [JavaScript SDK](javascript.md) (web).
 
 Source: [github.com/BinDist/bindist-api-python](https://github.com/BinDist/bindist-api-python).
 
