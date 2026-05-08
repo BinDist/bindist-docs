@@ -77,5 +77,3 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/bindist
   generator: false
-
-copyright: Copyright &copy; 2024-2025 BinDist
