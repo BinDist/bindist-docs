@@ -184,7 +184,7 @@ content, _ := os.ReadFile("app.exe")
 // Small files (< 10 MB) — single request
 result, err := admin.UploadSmallFile(ctx, "myapp", "1.0.0", "app.exe", content, "Initial release")
 
-// Large files (≥ 10 MB) — pre-signed S3 upload + completion
+// Large files (≥ 10 MB) — pre-signed S3 (or compatible) upload + completion
 result, err = admin.UploadLargeFile(ctx, "myapp", "2.0.0", "app.exe", content, "Major update")
 ```
 

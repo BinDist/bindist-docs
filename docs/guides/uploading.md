@@ -66,7 +66,7 @@ curl -X POST \
   https://api.bindist.eu/v1/management/upload/large-url
 ```
 
-#### Step 2: Upload to S3
+#### Step 2: Upload to S3 (or compatible)
 
 ```bash
 curl -X PUT \

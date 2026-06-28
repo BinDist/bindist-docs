@@ -112,7 +112,7 @@ curl -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
     "status": "COMPLETED",
     "contents": {
       "metadata": {
-        "downloadUrl": "https://s3.amazonaws.com/...",
+        "downloadUrl": "https://storage.bindist.eu/...",
         "sizeBytes": 1048576
       },
       "files": [
@@ -120,7 +120,7 @@ curl -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
           "applicationId": "my-app",
           "version": "2.1.0",
           "fileName": "my-app-2.1.0.exe",
-          "downloadUrl": "https://s3.amazonaws.com/...",
+          "downloadUrl": "https://storage.bindist.eu/...",
           "sizeBytes": 15728640
         }
       ]
@@ -152,18 +152,18 @@ curl -o my-app-2.1.0.exe "FILE_DOWNLOAD_URL"
 - **Premium tier**: 90-day retention
 - **Enterprise tier**: 365-day retention
 
-### Glacier Transition
+### Archival Transition
 
-Older backups are automatically moved to S3 Glacier for cost optimization:
+Older backups are automatically moved to lower-cost archival storage for cost optimization:
 
 | Age | Storage Class |
 |-----|---------------|
-| 0-30 days | S3 Standard |
-| 30-90 days | S3 Glacier Instant Retrieval |
-| 90+ days | S3 Glacier Deep Archive |
+| 0-30 days | Standard storage |
+| 30-90 days | Infrequent-access storage |
+| 90+ days | Cold archive |
 
 !!! note "Retrieval Time"
-    Glacier Deep Archive restores may take 12-48 hours.
+    Cold archive restores may take 12-48 hours.
 
 ## Restore Process
 

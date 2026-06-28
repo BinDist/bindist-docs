@@ -83,22 +83,6 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
   "https://api.bindist.eu/v1/applications?cursor=eyJsYXN0S2V5Ijp7..."
 ```
 
-## Rate Limiting
-
-The API uses rate limiting to ensure fair usage. Current limits:
-
-- **Standard tier**: 100 requests per minute
-- **Premium tier**: 500 requests per minute
-- **Enterprise tier**: Unlimited
-
-Rate limit headers are included in responses:
-
-```
-X-RateLimit-Limit: 100
-X-RateLimit-Remaining: 95
-X-RateLimit-Reset: 1705312800
-```
-
 ## Endpoints
 
 ### Customer Endpoints

@@ -131,7 +131,7 @@ with open("app.exe", "rb") as f:
     admin.upload_small_file("myapp", "1.0.0", "app.exe", f.read(),
                             release_notes="Initial release")
 
-# Upload a large file (>= 10 MB) — handles the pre-signed S3 flow internally
+# Upload a large file (>= 10 MB) — handles the pre-signed S3 (or compatible) flow internally
 with open("large-app.exe", "rb") as f:
     admin.upload_large_file("myapp", "2.0.0", "large-app.exe", f.read(),
                             release_notes="Major update")
@@ -147,7 +147,7 @@ admin.list_activity(activity_type="download", page=1)
 admin.list_customers()
 ```
 
-The two upload methods correspond to the [Upload Binary](../api/management.md#upload-binary) and [Large File Upload](../api/management.md#large-file-upload) endpoints. Use `upload_large_file` for anything ≥10 MB; it transparently calls `get_large_upload_url`, PUTs to S3, and then calls `complete_large_upload`.
+The two upload methods correspond to the [Upload Binary](../api/management.md#upload-binary) and [Large File Upload](../api/management.md#large-file-upload) endpoints. Use `upload_large_file` for anything ≥10 MB; it transparently calls `get_large_upload_url`, PUTs to S3 (or compatible) storage, and then calls `complete_large_upload`.
 
 ## Response shape
 

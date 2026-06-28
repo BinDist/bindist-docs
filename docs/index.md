@@ -1,6 +1,6 @@
 # Welcome to BinDist
 
-BinDist is a secure, multi-tenant application distribution system built on AWS serverless infrastructure. It provides API key-authenticated downloads with binary storage, version management, and tier-based access control.
+BinDist is a secure, multi-tenant application distribution system built on serverless infrastructure. It provides API key-authenticated downloads with binary storage, version management, and tier-based access control.
 
 ## Features
 
@@ -9,7 +9,7 @@ BinDist is a secure, multi-tenant application distribution system built on AWS s
 - **Multi-File Support** - Distribute applications with dependencies, documentation, and configuration files
 - **Tier-Based Access** - Control which customers can access specific versions
 - **Download Analytics** - Track downloads with IP detection and activity logs
-- **Backup & Recovery** - Automated backups with S3 Glacier lifecycle
+- **Backup & Recovery** - Automated backups with S3 (or compatible) archival lifecycle
 
 ## Quick Links
 

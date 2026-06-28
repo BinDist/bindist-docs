@@ -177,7 +177,7 @@ POST /v1/management/upload
 For files larger than 10MB, use the three-step upload process.
 
 !!! tip "Go shortcut"
-    The Go SDK's `admin.UploadLargeFile(ctx, appID, version, fileName, content, releaseNotes)` wraps all three steps below (get URL → PUT to S3 → complete). Reach for the raw steps only when you need finer control (resumable uploads, custom retry, alternative runtimes).
+    The Go SDK's `admin.UploadLargeFile(ctx, appID, version, fileName, content, releaseNotes)` wraps all three steps below (get URL → PUT to S3 (or compatible) → complete). Reach for the raw steps only when you need finer control (resumable uploads, custom retry, alternative runtimes).
 
 ### Step 1: Get Upload URL
 
@@ -228,14 +228,14 @@ POST /v1/management/upload/large-url
 {
   "success": true,
   "data": {
-    "uploadUrl": "https://s3.eu-central-1.amazonaws.com/...",
+    "uploadUrl": "https://storage.bindist.eu/...",
     "uploadId": "upl_abc123",
     "expiresAt": "2025-01-15T11:00:00Z"
   }
 }
 ```
 
-### Step 2: Upload to S3
+### Step 2: Upload to S3 (or compatible)
 
 Upload the file directly to the pre-signed URL:
 

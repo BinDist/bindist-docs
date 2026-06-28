@@ -71,7 +71,7 @@ GET /v1/downloads/url
 {
   "success": true,
   "data": {
-    "downloadUrl": "https://s3.eu-central-1.amazonaws.com/bindist-apps/...",
+    "downloadUrl": "https://storage.bindist.eu/bindist-apps/...",
     "expiresAt": "2025-01-15T12:30:00Z",
     "fileName": "my-app-2.1.0.exe",
     "fileSize": 15728640,

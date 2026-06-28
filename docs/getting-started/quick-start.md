@@ -100,7 +100,7 @@ Once you know which application and version you want, request a download URL:
 {
   "success": true,
   "data": {
-    "downloadUrl": "https://s3.amazonaws.com/...",
+    "downloadUrl": "https://storage.bindist.eu/...",
     "expiresAt": "2025-01-15T12:30:00Z",
     "fileName": "my-app-1.2.0.exe",
     "fileSize": 15728640,

@@ -122,7 +122,7 @@ Customer keys provide read-only access:
 
 === "Secret Manager"
 
-    For production environments, use a secret manager like AWS Secrets Manager, HashiCorp Vault, or similar.
+    For production environments, use a secret manager like HashiCorp Vault or your platform's equivalent.
 
 ## Error Responses
 
