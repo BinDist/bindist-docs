@@ -88,6 +88,39 @@ curl -X POST \
   https://api.bindist.eu/v1/management/upload/large-complete
 ```
 
+## Publishing a Version
+
+!!! warning "Uploaded versions start disabled"
+    A new version cannot be downloaded until you enable it. Until then it is left out
+    of `GET /v1/applications/{id}/versions`, and `GET /v1/downloads/url` returns
+    `403 Forbidden` for it. This is intentional: you can test the upload before your
+    customers get it.
+
+**Test before publishing:** send `X-Channel: Test` to list and download disabled versions:
+
+```bash
+curl -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "X-Channel: Test" \
+  "https://api.bindist.eu/v1/downloads/url?applicationId=my-app&version=1.0.0"
+```
+
+**Publish:** enable the version with an admin key. For multi-file versions, do this once
+after all files are uploaded.
+
+```bash
+curl -X PATCH \
+  -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"isEnabled": true}' \
+  https://api.bindist.eu/v1/applications/my-app/versions/1.0.0
+```
+
+If two-factor authentication (TOTP) is enabled on your account, include the current
+code: `{"isEnabled": true, "totpCode": "123456"}`.
+
+Send `{"isEnabled": false}` to withdraw a version again. The same endpoint can also
+update `releaseNotes`. See the [Update Version](../api/versions.md#update-version) reference.
+
 ## Multi-File Versions
 
 You can upload multiple files for a single version (e.g., main executable + dependencies).
@@ -189,6 +222,14 @@ jobs:
             -F "releaseNotes=Release $VERSION" \
             -F "file=@./dist/my-app" \
             https://api.bindist.eu/v1/management/upload
+
+          # Publish it (uploaded versions start disabled). Omit this step to
+          # release through the Test channel first and enable it later.
+          curl -X PATCH \
+            -H "Authorization: Bearer $BINDIST_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"isEnabled": true}' \
+            "https://api.bindist.eu/v1/applications/my-app/versions/$VERSION"
 ```
 
 ### PowerShell Script

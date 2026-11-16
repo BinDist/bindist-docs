@@ -1,6 +1,6 @@
 # Versions API
 
-Endpoints for listing versions and version files.
+Endpoints for listing versions and version files, and for publishing a version.
 
 ## List Versions
 
@@ -183,6 +183,95 @@ GET /v1/applications/{applicationId}/versions/{version}/files
   }
 }
 ```
+
+---
+
+## Update Version
+
+Publish or withdraw a version, or change its release notes. **Requires an admin API key.**
+
+```
+PATCH /v1/applications/{applicationId}/versions/{version}
+```
+
+Every uploaded version starts **disabled** (`isEnabled: false`). A disabled version is
+left out of [List Versions](#list-versions), and
+[Get Download URL](downloads.md#get-download-url) returns `403 Forbidden` for it, unless
+the request sends `X-Channel: Test`. Set `isEnabled: true` to publish it to your customers.
+
+### Path Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `applicationId` | string | The application ID |
+| `version` | string | The version string |
+
+### Request Body
+
+At least one of `isEnabled` or `releaseNotes` is required.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `isEnabled` | boolean | `true` publishes the version; `false` withdraws it again |
+| `releaseNotes` | string \| null | New release notes (max 5000 characters). `""` or `null` clears them |
+| `totpCode` | string | 6-digit code. Required when setting `isEnabled: true` on an account with two-factor authentication (TOTP) enabled |
+
+Unknown fields are ignored. In particular `isActive` cannot be changed here.
+
+### Example Request
+
+=== "curl"
+
+    ```bash
+    curl -X PATCH \
+      -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"isEnabled": true}' \
+      https://api.bindist.eu/v1/applications/my-app/versions/2.1.0
+    ```
+
+=== "Go"
+
+    ```go
+    enabled := true
+    _, err := admin.UpdateVersion(ctx, "my-app", "2.1.0",
+        bindist.UpdateVersionOptions{IsEnabled: &enabled})
+    ```
+
+=== "JavaScript"
+
+    ```typescript
+    await client.updateVersion('my-app', '2.1.0', { isEnabled: true });
+    ```
+
+### Example Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Version updated successfully",
+    "applicationId": "my-app",
+    "version": "2.1.0",
+    "releaseNotes": "Bug fixes and performance improvements",
+    "isActive": true,
+    "isEnabled": true,
+    "updatedAt": "2025-01-10T10:05:00Z"
+  }
+}
+```
+
+Enabling or disabling a version is recorded in the audit log as `VERSION_PROMOTED` /
+`VERSION_DEMOTED`.
+
+### Errors
+
+| Status | Cause |
+|--------|-------|
+| `400` | No update fields provided, invalid body, or `totpCode` missing while TOTP is enabled |
+| `401` | Invalid `totpCode` |
+| `403` | The API key is not an admin key |
+| `404` | Application or version not found |
 
 ## File Types
 
