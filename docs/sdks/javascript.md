@@ -336,6 +336,7 @@ interface ApiResponse<T> {
     message: string;
     details?: Record<string, unknown>;
     timestamp?: string;
+    httpStatus?: number; // set for every non-2xx response (1.0.2+)
   };
   meta?: {
     requestId: string;
@@ -351,15 +352,50 @@ const result = await client.getApplication('unknown-app');
 
 if (!result.success) {
   console.error(`Error ${result.error?.code}: ${result.error?.message}`);
-  if (result.error?.code === 'NOT_FOUND') {
-    console.log('Application does not exist');
+  if (result.error?.httpStatus === 404) {
+    console.log('Application does not exist, or this key has no access to it');
   }
 }
 ```
 
-Error codes from the server are upper case (`BAD_REQUEST`, `UNAUTHORIZED`, `NOT_FOUND`, …).
-The client adds `TIMEOUT` when a request exceeds `timeout`, and `NETWORK_ERROR` when the
-request fails or the response is not JSON.
+### Error codes
+
+Error codes come from two places, so compare them case-insensitively or check
+`error.httpStatus` instead:
+
+- **The API itself** returns upper-case codes in its error response, such as `BAD_REQUEST`,
+  `UNAUTHORIZED`, `FORBIDDEN` and `NOT_FOUND`.
+- **The client** creates lower-case codes for error responses that don't come from the API
+  itself. Examples are a rejected API key, the rate limiter, or a gateway error page. The code
+  is derived from the HTTP status:
+
+| HTTP status | `code` |
+|-------------|--------|
+| 400 | `bad_request` |
+| 401 | `unauthorized` |
+| 403 | `forbidden` |
+| 404 | `not_found` |
+| 409 | `conflict` |
+| 429 | `rate_limited` |
+| 5xx | `server_error` |
+| any other non-2xx | `http_error` |
+
+For example, a missing or invalid API key gives
+`{ code: 'unauthorized', message: 'Unauthorized', httpStatus: 401 }`.
+
+The client also returns two codes without an HTTP status:
+
+- `TIMEOUT` when a request takes longer than the configured `timeout`.
+- `NETWORK_ERROR` when the request itself fails (DNS, connection refused, …), or when a
+  successful response is not valid JSON.
+
+`httpStatus` and the lower-case codes were added in 1.0.2. Earlier versions returned
+`NETWORK_ERROR` for non-JSON error pages. For a rejected API key, they returned the raw
+`{"message":"Unauthorized"}` body, with no `success` and no `error`.
+
+!!! note
+    A customer key asking for an application it has no access to gets `NOT_FOUND` (404), not
+    `FORBIDDEN`. The API does not reveal which applications exist to customers who can't see them.
 
 ## TypeScript Support
 
