@@ -94,6 +94,24 @@ Once you know which application and version you want, request a download URL:
     console.log(data.data.downloadUrl);
     ```
 
+!!! warning "Just uploaded this version? Enable it first"
+    Every newly uploaded version starts **disabled**, so you can test it before your
+    customers see it. Until an admin enables it, the version is missing from version
+    lists and this request returns `403 Forbidden` ("Version '1.2.0' is not enabled for
+    download"). To publish it:
+
+    ```bash
+    curl -X PATCH \
+      -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"isEnabled": true}' \
+      https://api.bindist.eu/v1/applications/my-app/versions/1.2.0
+    ```
+
+    To download a disabled version without publishing it, send the header
+    `X-Channel: Test`. See [Publishing a Version](../guides/uploading.md#publishing-a-version)
+    and the [Update Version](../api/versions.md#update-version) reference.
+
 **Example Response:**
 
 ```json

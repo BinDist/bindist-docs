@@ -109,6 +109,7 @@ These endpoints require an admin API key:
 | POST | `/v1/management/upload` | [Upload binary](management.md#upload-binary) |
 | POST | `/v1/management/upload/large-url` | [Get upload URL](management.md#large-file-upload) |
 | POST | `/v1/management/upload/large-complete` | [Complete upload](management.md#step-3-complete-upload) |
+| PATCH | `/v1/applications/{id}/versions/{v}` | [Update / publish version](versions.md#update-version) |
 | GET | `/v1/management/customers` | [List customers](management.md#list-customers) |
 | PATCH | `/v1/management/customers/{id}` | [Update customer](management.md#update-customer) |
 | POST | `/v1/management/customers/{id}/apikeys` | [Create API key](management.md#create-api-key) |
